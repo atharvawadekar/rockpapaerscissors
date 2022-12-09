@@ -3,10 +3,25 @@ import React, { useEffect, useState } from 'react';
 import { Button } from 'react-bootstrap';
 import io from 'socket.io-client';
 import './Home.css';
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert from '@mui/material/Alert';
+
+const Alert = React.forwardRef(function Alert(props, ref) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 const socket = io.connect('http://localhost:5000');
 
 function Home() {
+    //
+    const [open, setOpen] = useState(0);
+    const handleClose = (event, reason) => {
+        if (reason === 'clickaway') {
+          return;
+        }
+        setOpen(0);
+    }
+    //
 
     const [isOpponentPresent, setIsOpponentPresent] = useState(false);
 
@@ -36,7 +51,12 @@ function Home() {
             setIsOpponentPresent(true);
         }
         else{
-            console.log(data);
+            if(data === 'Room is full'){
+                setOpen(1);
+            }
+            else if(data === 'Room does not exist'){
+                setOpen(2);
+            }
         }
     });
     socket.on('opponent_joined', () => {
@@ -99,17 +119,28 @@ function Home() {
         setMyScore(0);
         setOppScore(0);
     });
-
+    
     return (
         <Stack style={{width:'100%', height:'calc(100vh)', boxSizing:'border-box'}}>
             {
             !currentRoom && 
             <div style={{width:'100%', height:'100%', backgroundColor:'black', display:'flex', justifyContent:'center', alignItems:'center'}}>
                 <Stack sx={{width:'40%'}} gap={2}>
-                    <button className='home_button' variant='primary' onClick={handleCreateRoom} disableElevation>Create Room</button>
+                    <button className='home_button' variant='primary' onClick={handleCreateRoom}>Create Room</button>
                     <h3 className='home_text' style={{textAlign:'center'}}>OR</h3>
                     <TextField sx={{backgroundColor:'white'}} size='small' type='text' placeholder="Enter room id" onChange={(e) => setRoomValue(e.target.value)} value={roomValue} />
-                    <button className='home_button' variant='primary' onClick={handleJoinRoom} disableElevation>Join Room</button>
+                    <button className='home_button' variant='primary' onClick={handleJoinRoom}>Join Room</button>
+
+                    <Snackbar sx={{width:'30%'}} open={open !== 0} autoHideDuration={6000} onClose={handleClose} anchorOrigin={{vertical:'top', horizontal:'center'}}>
+                        <Alert onClose={handleClose} severity={open===1? "info":"error"} sx={{ width: '100%' }}>
+                            {
+                                open === 1 && <>Room is Full</>
+                            }
+                            {
+                                open === 2 && <>Room does not exist</>
+                            }
+                        </Alert>
+                    </Snackbar>
                 </Stack>
             </div>
             }
