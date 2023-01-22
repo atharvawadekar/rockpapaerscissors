@@ -1,5 +1,5 @@
 import { Stack, TextField, Typography } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Button } from 'react-bootstrap';
 import io from 'socket.io-client';
 import './Home.css';
@@ -33,6 +33,25 @@ function Home() {
 
     const [myScore, setMyScore] = useState(0);
     const [oppScore, setOppScore] = useState(0);
+
+    //Chat
+    const [chatList, setChatList] = useState([]);
+    const [currentMessage, setCurrentMessage] = useState("");
+    const messageEndRef = useRef(null);
+
+    useEffect(() => {
+        messageEndRef.current?.scrollIntoView();
+    }, [chatList])
+
+    const handleSend = () => {
+        setChatList([...chatList, "You: "+currentMessage]);
+        setCurrentMessage("");
+        socket.emit('send_message', {currentMessage:currentMessage, roomId:currentRoom});
+    }
+    socket.on('receive_message', (data) => {
+        setChatList([...chatList, "Enemy: "+data]);
+    });
+    //Chat ends
 
     const handleCreateRoom = (e) => {
         socket.emit('create_room');
@@ -118,6 +137,7 @@ function Home() {
         setOppChoice("");
         setMyScore(0);
         setOppScore(0);
+        setChatList([]);
     });
     
     return (
@@ -195,6 +215,23 @@ function Home() {
             }
             </Stack>
             </div>}
+
+            {currentRoom && isOpponentPresent &&
+                <div style={{height:'150px', backgroundColor:'black'}}>
+                    <div style={{position:'sticky'}}>
+                        <input type='text' value={currentMessage} onChange={(e) => setCurrentMessage(e.target.value)} />
+                        <button onClick={handleSend}>Send</button>
+                    </div>
+                    <div style={{overflow:'scroll', height:'100px'}}>
+                    {
+                        chatList.map((item, index) => {
+                            return <div className='chat_text' key={index}>{item}</div>
+                        })
+                    }
+                    <div ref={messageEndRef} />
+                    </div>
+                </div>
+            }
         </Stack>
     )
 }

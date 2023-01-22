@@ -36,3 +36,7 @@
 .game_btn:hover{
     color: green;
 }
+
+.chat_text {
+    color: white;
+}

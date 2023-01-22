@@ -44,6 +44,14 @@ io.on('connection', (socket) => {
         socket.to(roomId).emit('receive_choice', choice);
     });
 
+    //CHAT//
+
+    socket.on('send_message',({currentMessage, roomId}) => {
+        socket.to(roomId).emit('receive_message', currentMessage);
+    });
+
+    //CHAT ENDS//
+
     socket.on("disconnecting", () => {
         socket.rooms.forEach((value) => {
             if(value.length === 16){
