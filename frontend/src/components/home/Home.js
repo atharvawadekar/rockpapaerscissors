@@ -215,8 +215,8 @@ function Home() {
             }
             </Stack>
             </div>}
-
-            {currentRoom && isOpponentPresent &&
+            
+            {/* {currentRoom && isOpponentPresent &&
                 <div style={{height:'150px', backgroundColor:'black'}}>
                     <div style={{position:'sticky'}}>
                         <input type='text' value={currentMessage} onChange={(e) => setCurrentMessage(e.target.value)} />
@@ -231,7 +231,7 @@ function Home() {
                     <div ref={messageEndRef} />
                     </div>
                 </div>
-            }
+            } */}
         </Stack>
     )
 }
